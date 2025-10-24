@@ -38,6 +38,15 @@ app.use('/api/user', userRoutes);
 app.use('/api/history', historyRoutes);
 app.use('/api/image', imageRoutes);
 
+// Root route
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Whyred AI Backend API', 
+    version: '1.0.0',
+    endpoints: ['/api/ask', '/api/search', '/api/image', '/api/user', '/api/history']
+  });
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });

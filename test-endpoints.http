@@ -1,0 +1,50 @@
+### Health Check
+GET http://localhost:3000/health
+
+### Ask - Text Generation
+POST http://localhost:3000/api/ask
+Authorization: Bearer YOUR_FIREBASE_TOKEN
+Content-Type: application/json
+
+{
+  "prompt": "Explain quantum computing in simple terms",
+  "type": "text"
+}
+
+### Ask - Code Generation  
+POST http://localhost:3000/api/ask
+Authorization: Bearer YOUR_FIREBASE_TOKEN
+Content-Type: application/json
+
+{
+  "prompt": "Create a Python function to calculate fibonacci numbers",
+  "type": "code"
+}
+
+### Search
+POST http://localhost:3000/api/search
+Authorization: Bearer YOUR_FIREBASE_TOKEN
+Content-Type: application/json
+
+{
+  "query": "latest AI developments 2024"
+}
+
+### Image Analysis
+POST http://localhost:3000/api/image
+Authorization: Bearer YOUR_FIREBASE_TOKEN
+Content-Type: application/json
+
+{
+  "prompt": "What do you see in this image?",
+  "imageData": "base64_image_data_here",
+  "action": "analyze"
+}
+
+### Get User Data
+GET http://localhost:3000/api/user
+Authorization: Bearer YOUR_FIREBASE_TOKEN
+
+### Get Chat History
+GET http://localhost:3000/api/history?limit=10
+Authorization: Bearer YOUR_FIREBASE_TOKEN

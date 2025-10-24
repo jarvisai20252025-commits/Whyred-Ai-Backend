@@ -1,2 +1,0 @@
-# Whyred Ai Backend
-

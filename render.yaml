@@ -1,12 +1,14 @@
 services:
   - type: web
     name: whyred-ai-backend
-    env: node
+    env: python
     plan: free
-    buildCommand: npm install
-    startCommand: npm start
+    buildCommand: pip install -r requirements.txt
+    startCommand: python start.py
     envVars:
-      - key: NODE_ENV
+      - key: ENVIRONMENT
         value: production
+      - key: HOST
+        value: 0.0.0.0
       - key: PORT
         value: 10000

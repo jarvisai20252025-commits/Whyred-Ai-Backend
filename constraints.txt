@@ -1,1 +1,4 @@
 grpcio==1.43.0 --only-binary=grpcio
+protobuf==3.19.6 --only-binary=protobuf
+firebase-admin==5.2.0 --only-binary=firebase-admin
+google-generativeai==0.3.2 --only-binary=google-generativeai

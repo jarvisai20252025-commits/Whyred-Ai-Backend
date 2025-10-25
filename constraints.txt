@@ -1,1 +1,1 @@
-grpcio==1.44.0 --only-binary=grpcio
+grpcio==1.43.0 --only-binary=grpcio

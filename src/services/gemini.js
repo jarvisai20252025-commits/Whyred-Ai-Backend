@@ -6,9 +6,16 @@ class GeminiService {
   constructor() {
     this.models = {
       text: 'gemini-2.0-flash-exp',
-      vision: 'gemini-2.0-flash-exp',
+      vision: 'gemini-2.0-flash-exp', 
       code: 'gemini-2.0-flash-exp',
-      fallback: 'gemini-1.5-flash'
+      fallback: 'gemini-1.5-flash',
+      // Alternative model names to try
+      alternatives: [
+        'gemini-2.0-flash-exp',
+        'gemini-2.0-flash',
+        'models/gemini-2.0-flash-exp',
+        'models/gemini-2.0-flash'
+      ]
     };
     
     this.retryConfig = {
@@ -20,39 +27,55 @@ class GeminiService {
 
   async generateText(prompt, modelType = 'text') {
     return this.executeWithRetry(async () => {
-      const model = this.models[modelType] || this.models.text;
+      let model = this.models[modelType] || this.models.text;
       console.log(`Using model: ${model} for prompt: ${prompt.substring(0, 50)}...`);
       
-      const generativeModel = genAI.getGenerativeModel({ 
-        model,
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 8192,
-        },
-        safetySettings: [
-          {
-            category: 'HARM_CATEGORY_HARASSMENT',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-          },
-          {
-            category: 'HARM_CATEGORY_HATE_SPEECH',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-          },
-        ],
-      });
-
-      const result = await generativeModel.generateContent(prompt);
-      const response = result.response;
+      // Try different model name formats if the first one fails
+      const modelsToTry = [model, ...this.models.alternatives, this.models.fallback];
+      let lastError;
       
-      if (!response || !response.text) {
-        throw new Error('Empty response from Gemini API');
+      for (const modelName of modelsToTry) {
+        try {
+          const generativeModel = genAI.getGenerativeModel({ 
+            model: modelName,
+            generationConfig: {
+              temperature: 0.7,
+              topK: 40,
+              topP: 0.95,
+              maxOutputTokens: 8192,
+            },
+            safetySettings: [
+              {
+                category: 'HARM_CATEGORY_HARASSMENT',
+                threshold: 'BLOCK_MEDIUM_AND_ABOVE',
+              },
+              {
+                category: 'HARM_CATEGORY_HATE_SPEECH',
+                threshold: 'BLOCK_MEDIUM_AND_ABOVE',
+              },
+            ],
+          });
+
+          const result = await generativeModel.generateContent(prompt);
+          const response = result.response;
+          
+          if (!response || !response.text) {
+            throw new Error('Empty response from Gemini API');
+          }
+          
+          const text = response.text();
+          console.log(`Generated response length: ${text.length} using model: ${modelName}`);
+          return text;
+        } catch (error) {
+          lastError = error;
+          console.log(`Model ${modelName} failed: ${error.message}`);
+          if (!error.message.includes('not found') && !error.message.includes('404')) {
+            throw error; // If it's not a model not found error, throw immediately
+          }
+        }
       }
       
-      const text = response.text();
-      console.log(`Generated response length: ${text.length}`);
-      return text;
+      throw lastError; // All models failed
     });
   }
 
@@ -170,6 +193,41 @@ Answer:`;
     } catch (error) {
       console.error('Health check failed:', error.message);
       return false;
+    }
+  }
+
+  async listAvailableModels() {
+    try {
+      const { GoogleGenerativeAI } = require('@google/generative-ai');
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+      
+      // This is a workaround since the SDK doesn't expose listModels directly
+      // We'll try to generate with different models to see which ones work
+      const testModels = [
+        'gemini-2.0-flash-exp',
+        'gemini-2.0-flash',
+        'models/gemini-2.0-flash-exp',
+        'models/gemini-2.0-flash',
+        'gemini-1.5-flash',
+        'gemini-1.5-pro'
+      ];
+      
+      const workingModels = [];
+      
+      for (const modelName of testModels) {
+        try {
+          const model = genAI.getGenerativeModel({ model: modelName });
+          await model.generateContent('test');
+          workingModels.push(modelName);
+        } catch (error) {
+          // Model doesn't work, skip it
+        }
+      }
+      
+      return workingModels;
+    } catch (error) {
+      console.error('Error listing models:', error.message);
+      return [];
     }
   }
 

@@ -25,6 +25,22 @@ router.get('/health', async (req, res) => {
   }
 });
 
+// List available models endpoint
+router.get('/models', async (req, res) => {
+  try {
+    const availableModels = await geminiService.listAvailableModels();
+    res.json({
+      models: availableModels,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // Test endpoint without authentication
 router.post('/test', async (req, res) => {
   try {
@@ -42,6 +58,7 @@ router.post('/test', async (req, res) => {
     });
   } catch (error) {
     console.error('Test endpoint error:', error);
+    const { prompt = 'test message' } = req.body;
     res.json({
       response: `Test response for: "${prompt}". The AI service is currently being optimized.`,
       timestamp: new Date().toISOString(),

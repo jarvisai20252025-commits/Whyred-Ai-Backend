@@ -71,7 +71,7 @@ async def test_endpoint(request: TestRequest):
 
 @router.post("/")
 @limiter.limit("100/15minutes")
-async def ask_endpoint(request_data: Request, ask_request: AskRequest, user=Depends(get_current_user)):
+async def ask_endpoint(request: Request, ask_request: AskRequest, user=Depends(get_current_user)):
     """Main ask endpoint with authentication"""
     try:
         if not ask_request.prompt:

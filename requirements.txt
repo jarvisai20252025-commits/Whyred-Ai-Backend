@@ -7,3 +7,5 @@ httpx==0.25.2
 python-multipart==0.0.6
 slowapi==0.1.9
 pydantic==2.5.0
+cryptography==41.0.7
+grpcio==1.59.3
